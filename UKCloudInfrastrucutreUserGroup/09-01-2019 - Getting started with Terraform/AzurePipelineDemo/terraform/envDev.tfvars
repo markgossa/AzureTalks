@@ -1,4 +1,4 @@
-ResourceGroupName = "RG-MarkGossa-Dev"
+ResourceGroupName = "RG-UKCloudInfra-Dev"
 ResourceGroupLocation = "West Europe"
 VnetName = "VNET0001-Dev"
 VnetAddressSpace = ["10.0.0.0/16"]
