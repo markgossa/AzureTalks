@@ -40,7 +40,12 @@ resource "azurerm_subnet" "lanSubnet" {
   resource_group_name         = "${azurerm_resource_group.resourceGroup1.name}"
   virtual_network_name        = "${azurerm_virtual_network.virtualNetwork1.name}"
   address_prefix              = "${var.SubnetAddressPrefix}"
-  network_security_group_id   = "${azurerm_network_security_group.networkSecurityGroup1.id}"
+}
+
+# Network security group association
+resource "azurerm_subnet_network_security_group_association" "test" {
+  subnet_id                 = "${azurerm_subnet.lanSubnet.id}"
+  network_security_group_id = "${azurerm_network_security_group.networkSecurityGroup1.id}"
 }
 
 # Create a public IP

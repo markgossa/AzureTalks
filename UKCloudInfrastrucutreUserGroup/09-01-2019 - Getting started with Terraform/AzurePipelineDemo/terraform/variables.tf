@@ -1,7 +1,9 @@
 variable "ResourceGroupName" {}
 variable "ResourceGroupLocation" {}
 variable "VnetName" {}
-variable "VnetAddressSpace" {}
+variable "VnetAddressSpace" {
+    type = "list"
+}
 variable "NsgName" {}
 variable "SubnetName" {}
 variable "SubnetAddressPrefix" {}
