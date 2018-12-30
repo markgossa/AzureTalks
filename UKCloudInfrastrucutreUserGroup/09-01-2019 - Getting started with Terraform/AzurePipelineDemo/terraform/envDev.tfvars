@@ -1,0 +1,12 @@
+ResourceGroupName = "RG-MarkGossa-Dev"
+ResourceGroupLocation = "West Europe"
+VnetName = "VNET0001-Dev"
+VnetAddressSpace = ["10.0.0.0"]
+NsgName = "NSG-LAN-Dev"
+SubnetName = "LAN-Dev"
+SubnetAddressPrefix = "10.0.0.0/24"
+PublicIpAddressName = "vm0001-pip"
+NetworkInterfaceName = "vm0001-nic"
+VirtualMachineName = "vm0001"
+VirtualMachineSize = "Standard_A2_v2"
+VirtualMachineOsDiskName = "vm0001-disk1"
