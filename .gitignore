@@ -1,0 +1,8 @@
+.terraform
+tfplan
+testcommands.ps1
+*.tfstate
+*.tfstate.backup
+*test*.ps1
+*private*.*
+*Private*.*
