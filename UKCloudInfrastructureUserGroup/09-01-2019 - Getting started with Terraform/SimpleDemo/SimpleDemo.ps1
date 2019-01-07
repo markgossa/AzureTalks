@@ -6,12 +6,12 @@
 
 # Run below commands
 az account set --subscription "Your subscription name" # Changes to the correct subscription
+cd ~
 terraform init # Terraform downloads the terraform Azure plugin
 terraform plan -out=plan # This is what Terraform will do to make your infrastructure like the configuration
 terraform apply
 
 # Open new session
-cd /home/<yourusername>
 code plan
 code terraform.tfstate
 cd ./.terraform
