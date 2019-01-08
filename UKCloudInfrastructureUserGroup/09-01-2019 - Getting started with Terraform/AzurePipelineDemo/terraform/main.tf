@@ -98,7 +98,7 @@ resource "azurerm_virtual_machine" "main" {
 
   os_profile {
     computer_name  = "${var.VirtualMachineName}"
-    admin_username = "${var.Username}" # Enter your username in here
-    admin_password = "${var.Password}" # Enter your password in here
+    admin_username = "${var.Username}"
+    admin_password = "${var.Password}"
   }
 }
