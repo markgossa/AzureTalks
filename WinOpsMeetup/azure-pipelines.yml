@@ -1,0 +1,79 @@
+name: $(rev:r)
+
+resources:
+- repo: self
+  clean: true
+
+trigger:
+  batch: true 
+  branches: 
+    include:
+    - master
+    - develop
+
+stages:
+- stage: Build
+  jobs:
+  - job: Build
+    pool: 
+      vmImage: windows-2019
+    steps:
+
+    - task: PowerShell@2
+      displayName: 'Install Terraform'
+      inputs:
+        targetType: 'inline'
+        script: 'choco install terraform'
+
+    - task: PowerShell@2
+      displayName: 'Terraform init'
+      inputs:
+        targetType: 'inline'
+        script: terraform init -input=false -backend=false
+        workingDirectory: '$(Build.SourcesDirectory)\WinOpsMeetup\27-06-2019 - Terraform and Windows\AzurePipelineDemo\terraform'
+
+    - task: PowerShell@2
+      displayName: 'Terraform validate (DEV)'
+      inputs:
+        targetType: 'inline'
+        script: |
+          terraform validate `
+          -var-file=envDev.tfvars `
+          -var client_id=$(client_id) `
+          -var client_secret=$(client_secret) `
+          -var tenant_id=$(tenant_id) `
+          -var subscription_id=$(subscription_id) `
+          -var NsgSourceAddressPrefix=$(NsgSourceAddressPrefix) `
+          -var Username=$(Username) `
+          -var Password=$(Password)
+        workingDirectory: '$(Build.SourcesDirectory)\WinOpsMeetup\27-06-2019 - Terraform and Windows\AzurePipelineDemo\terraform'
+
+    - task: PublishBuildArtifacts@1
+      displayName: 'Publish Artifacts: Terraform'
+      inputs:
+        pathtoPublish: '$(Build.ArtifactStagingDirectory)\WinOpsMeetup\27-06-2019 - Terraform and Windows\AzurePipelineDemo\terraform'
+        ArtifactName: 'terraform'
+
+- stage: DEV
+  jobs:
+  - deployment: 'DEV'
+    pool:
+      vmImage: windows-2019
+    environment: WinOpsDevEnv
+    strategy:
+      runOnce:
+        deploy:
+          steps:
+
+          - task: PowerShell@2
+            displayName: 'Install Terraform'
+            inputs:
+              targetType: 'inline'
+              script: 'choco install terraform'
+
+          - task: PowerShell@2
+            displayName: 'Terraform init'
+            inputs:
+              targetType: 'inline'
+              script: terraform init -input=false -backend=false
+              workingDirectory: 'terraform'
