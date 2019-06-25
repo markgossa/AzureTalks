@@ -56,15 +56,47 @@ stages:
           -var Password=$(Password)
         workingDirectory: '$(Build.SourcesDirectory)\WinOpsMeetup\27-06-2019 - Terraform and Windows\AzurePipelineDemo\terraform'
 
+    - task: PowerShell@2
+      displayName: 'Terraform validate (TEST)'
+      inputs:
+        targetType: 'inline'
+        script: |
+          terraform validate `
+          -var-file=envTest.tfvars `
+          -var client_id=$(client_id) `
+          -var client_secret=$(client_secret) `
+          -var tenant_id=$(tenant_id) `
+          -var subscription_id=$(subscription_id) `
+          -var NsgSourceAddressPrefix=$(NsgSourceAddressPrefix) `
+          -var Username=$(Username) `
+          -var Password=$(Password)
+        workingDirectory: '$(Build.SourcesDirectory)\WinOpsMeetup\27-06-2019 - Terraform and Windows\AzurePipelineDemo\terraform'     
+
+    - task: PowerShell@2
+      displayName: 'Terraform validate (PROD)'
+      inputs:
+        targetType: 'inline'
+        script: |
+          terraform validate `
+          -var-file=envProd.tfvars `
+          -var client_id=$(client_id) `
+          -var client_secret=$(client_secret) `
+          -var tenant_id=$(tenant_id) `
+          -var subscription_id=$(subscription_id) `
+          -var NsgSourceAddressPrefix=$(NsgSourceAddressPrefix) `
+          -var Username=$(Username) `
+          -var Password=$(Password)
+        workingDirectory: '$(Build.SourcesDirectory)\WinOpsMeetup\27-06-2019 - Terraform and Windows\AzurePipelineDemo\terraform'           
+
     - task: PublishBuildArtifacts@1
       displayName: 'Publish Artifacts: Terraform'
       inputs:
-        pathtoPublish: '$(Build.ArtifactStagingDirectory)\WinOpsMeetup\27-06-2019 - Terraform and Windows\AzurePipelineDemo\terraform'
+        pathtoPublish: '$(Build.SourcesDirectory)\WinOpsMeetup\27-06-2019 - Terraform and Windows\AzurePipelineDemo\terraform'
         ArtifactName: 'terraform'
 
 - stage: DEV
   variables: 
-    terraform_backend_key: WinOps-dev
+    terraform_backend_key: winops-dev
   jobs:
   - deployment: 'DEV'
     pool:
@@ -87,3 +119,20 @@ stages:
               targetType: 'inline'
               script: terraform init -input=false -backend=false
               workingDirectory: 'terraform'
+
+          - task: PowerShell@2
+            displayName: 'Terraform plan'
+            inputs:
+              targetType: 'inline'
+              script: |
+                terraform plan `
+                -out=plan `
+                -var-file=envDev.tfvars `
+                -var client_id=$(client_id) `
+                -var client_secret=$(client_secret) `
+                -var tenant_id=$(tenant_id) `
+                -var subscription_id=$(subscription_id) `
+                -var NsgSourceAddressPrefix=$(NsgSourceAddressPrefix) `
+                -var Username=$(Username) `
+                -var Password=$(Password)
+              workingDirectory: '$(Build.SourcesDirectory)\WinOpsMeetup\27-06-2019 - Terraform and Windows\AzurePipelineDemo\terraform'
