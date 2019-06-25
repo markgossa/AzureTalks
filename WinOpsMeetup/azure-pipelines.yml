@@ -130,7 +130,7 @@ stages:
               script: |
                 terraform plan `
                 -out=plan `
-                -var-file=envDev.tfvars `
+                -var-file="envDev.tfvars" `
                 -var client_id=$(client_id) `
                 -var client_secret=$(client_secret) `
                 -var tenant_id=$(tenant_id) `
@@ -185,7 +185,7 @@ stages:
               script: |
                 terraform plan `
                 -out=plan `
-                -var-file=envTest.tfvars `
+                -var-file="envTest.tfvars" `
                 -var client_id=$(client_id) `
                 -var client_secret=$(client_secret) `
                 -var tenant_id=$(tenant_id) `
@@ -240,7 +240,7 @@ stages:
               script: |
                 terraform plan `
                 -out=plan `
-                -var-file=envProd.tfvars `
+                -var-file="envProd.tfvars" `
                 -var client_id=$(client_id) `
                 -var client_secret=$(client_secret) `
                 -var tenant_id=$(tenant_id) `
