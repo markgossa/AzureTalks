@@ -13,7 +13,7 @@ variables:
 - group: 'Azure Service Principal - Visual Studio Subscription'
 - group: 'Terraform Remote State - Visual Studio Subscription'
 - name: terrraform_backend_container_name
-  value: 'WinOps-tfstate'
+  value: 'winops-tfstate'
 - name: terrraform_backend_storage_account_name
   value: 'terraformstate79432'
 - name: 'NsgSourceAddressPrefix'
