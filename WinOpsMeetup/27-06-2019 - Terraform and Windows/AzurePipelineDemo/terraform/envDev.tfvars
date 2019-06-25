@@ -1,0 +1,12 @@
+ResourceGroupName = "RG-WinOps-Dev"
+ResourceGroupLocation = "West Europe"
+VnetName = "VNET0001-Dev"
+VnetAddressSpace = ["10.0.0.0/16"]
+NsgName = "NSG-LAN-Dev"
+SubnetName = "LAN-Dev"
+SubnetAddressPrefix = "10.0.0.0/24"
+PublicIpAddressName = "vm0001-dev-pip"
+NetworkInterfaceName = "vm0001-dev-nic"
+VirtualMachineName = "vmdev0001"
+VirtualMachineSize = "Standard_A2_v2"
+VirtualMachineOsDiskName = "vm0001-dev-disk1"

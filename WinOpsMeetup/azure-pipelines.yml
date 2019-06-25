@@ -1,0 +1,258 @@
+resources:
+- repo: self
+  clean: true
+
+trigger:
+  batch: true 
+  branches: 
+    include:
+    - master
+    - develop
+
+variables:
+- group: 'Azure Service Principal - Sandbox'
+- group: 'Terraform Remote State - Sandbox'
+- name: terraform_backend_container_name
+  value: 'winopstf'
+- name: 'NsgSourceAddressPrefix'
+  value: '8.8.8.8'
+
+stages:
+- stage: Build
+  jobs:
+  - job: Build
+    pool: 
+      vmImage: windows-2019
+    steps:
+
+    - task: PowerShell@2
+      displayName: 'Install Terraform'
+      inputs:
+        targetType: 'inline'
+        script: 'choco install terraform'
+
+    - task: PowerShell@2
+      displayName: 'Terraform init'
+      inputs:
+        targetType: 'inline'
+        script: terraform init -input=false -backend=false
+        workingDirectory: '$(Build.SourcesDirectory)\WinOpsMeetup\27-06-2019 - Terraform and Windows\AzurePipelineDemo\terraform'
+
+    - task: PowerShell@2
+      displayName: 'Terraform validate (DEV)'
+      inputs:
+        targetType: 'inline'
+        script: |
+          terraform validate `
+          -var-file=envDev.tfvars `
+          -var client_id=$(client_id) `
+          -var client_secret=$(client_secret) `
+          -var tenant_id=$(tenant_id) `
+          -var subscription_id=$(subscription_id) `
+          -var NsgSourceAddressPrefix=$(NsgSourceAddressPrefix) `
+          -var Username=$(Username) `
+          -var Password=$(Password)
+        workingDirectory: '$(Build.SourcesDirectory)\WinOpsMeetup\27-06-2019 - Terraform and Windows\AzurePipelineDemo\terraform'
+
+    - task: PowerShell@2
+      displayName: 'Terraform validate (TEST)'
+      inputs:
+        targetType: 'inline'
+        script: |
+          terraform validate `
+          -var-file=envTest.tfvars `
+          -var client_id=$(client_id) `
+          -var client_secret=$(client_secret) `
+          -var tenant_id=$(tenant_id) `
+          -var subscription_id=$(subscription_id) `
+          -var NsgSourceAddressPrefix=$(NsgSourceAddressPrefix) `
+          -var Username=$(Username) `
+          -var Password=$(Password)
+        workingDirectory: '$(Build.SourcesDirectory)\WinOpsMeetup\27-06-2019 - Terraform and Windows\AzurePipelineDemo\terraform'     
+
+    - task: PowerShell@2
+      displayName: 'Terraform validate (PROD)'
+      inputs:
+        targetType: 'inline'
+        script: |
+          terraform validate `
+          -var-file=envProd.tfvars `
+          -var client_id=$(client_id) `
+          -var client_secret=$(client_secret) `
+          -var tenant_id=$(tenant_id) `
+          -var subscription_id=$(subscription_id) `
+          -var NsgSourceAddressPrefix=$(NsgSourceAddressPrefix) `
+          -var Username=$(Username) `
+          -var Password=$(Password)
+        workingDirectory: '$(Build.SourcesDirectory)\WinOpsMeetup\27-06-2019 - Terraform and Windows\AzurePipelineDemo\terraform'           
+
+    - task: PublishBuildArtifacts@1
+      displayName: 'Publish Artifacts: Terraform'
+      inputs:
+        pathtoPublish: '$(Build.SourcesDirectory)\WinOpsMeetup\27-06-2019 - Terraform and Windows\AzurePipelineDemo\terraform'
+        ArtifactName: 'terraform'
+
+- stage: DEV
+  variables: 
+    terraform_backend_key: winops-dev
+  jobs:
+  - deployment: 'DEV'
+    pool:
+      vmImage: windows-2019
+    environment: WinOpsDevEnv
+    strategy:
+      runOnce:
+        deploy:
+          steps:
+
+          - task: PowerShell@2
+            displayName: 'Install Terraform'
+            inputs:
+              targetType: 'inline'
+              script: 'choco install terraform'
+
+          - task: PowerShell@2
+            displayName: 'Terraform init'
+            inputs:
+              targetType: 'inline'
+              script: |
+                terraform init `
+                -backend-config="storage_account_name=$(terraform_backend_storage_account_name)" `
+                -backend-config="container_name=$(terraform_backend_container_name)" `
+                -backend-config="key=$(terraform_backend_key)" `
+                -backend-config="access_key=$(terraform_backend_access_key)"
+              workingDirectory: '$(Agent.BuildDirectory)\terraform'
+
+          - task: PowerShell@2
+            displayName: 'Terraform plan'
+            inputs:
+              targetType: 'inline'
+              script: |
+                terraform plan `
+                -out=plan `
+                -var-file="envDev.tfvars" `
+                -var client_id=$(client_id) `
+                -var client_secret=$(client_secret) `
+                -var tenant_id=$(tenant_id) `
+                -var subscription_id=$(subscription_id) `
+                -var NsgSourceAddressPrefix=$(NsgSourceAddressPrefix) `
+                -var Username=$(Username) `
+                -var Password=$(Password)
+              workingDirectory: '$(Agent.BuildDirectory)\terraform'
+
+          - task: PowerShell@2
+            displayName: 'Terraform apply'
+            inputs:
+              targetType: 'inline'
+              script: terraform apply -auto-approve plan
+              workingDirectory: '$(Agent.BuildDirectory)\terraform'
+
+- stage: TEST
+  variables: 
+    terraform_backend_key: winops-test
+  jobs:
+  - deployment: 'TEST'
+    pool:
+      vmImage: windows-2019
+    environment: WinOpsTestEnv
+    strategy:
+      runOnce:
+        deploy:
+          steps:
+
+          - task: PowerShell@2
+            displayName: 'Install Terraform'
+            inputs:
+              targetType: 'inline'
+              script: 'choco install terraform'
+
+          - task: PowerShell@2
+            displayName: 'Terraform init'
+            inputs:
+              targetType: 'inline'
+              script: |
+                terraform init `
+                -backend-config="storage_account_name=$(terraform_backend_storage_account_name)" `
+                -backend-config="container_name=$(terraform_backend_container_name)" `
+                -backend-config="key=$(terraform_backend_key)" `
+                -backend-config="access_key=$(terraform_backend_access_key)"
+              workingDirectory: '$(Agent.BuildDirectory)\terraform'
+
+          - task: PowerShell@2
+            displayName: 'Terraform plan'
+            inputs:
+              targetType: 'inline'
+              script: |
+                terraform plan `
+                -out=plan `
+                -var-file="envTest.tfvars" `
+                -var client_id=$(client_id) `
+                -var client_secret=$(client_secret) `
+                -var tenant_id=$(tenant_id) `
+                -var subscription_id=$(subscription_id) `
+                -var NsgSourceAddressPrefix=$(NsgSourceAddressPrefix) `
+                -var Username=$(Username) `
+                -var Password=$(Password)
+              workingDirectory: '$(Agent.BuildDirectory)\terraform'
+
+          - task: PowerShell@2
+            displayName: 'Terraform apply'
+            inputs:
+              targetType: 'inline'
+              script: terraform apply -auto-approve plan
+              workingDirectory: '$(Agent.BuildDirectory)\terraform'
+
+- stage: PROD
+  variables: 
+    terraform_backend_key: winops-prod
+  jobs:
+  - deployment: 'PROD'
+    pool:
+      vmImage: windows-2019
+    environment: WinOpsProdEnv
+    strategy:
+      runOnce:
+        deploy:
+          steps:
+
+          - task: PowerShell@2
+            displayName: 'Install Terraform'
+            inputs:
+              targetType: 'inline'
+              script: 'choco install terraform'
+
+          - task: PowerShell@2
+            displayName: 'Terraform init'
+            inputs:
+              targetType: 'inline'
+              script: |
+                terraform init `
+                -backend-config="storage_account_name=$(terraform_backend_storage_account_name)" `
+                -backend-config="container_name=$(terraform_backend_container_name)" `
+                -backend-config="key=$(terraform_backend_key)" `
+                -backend-config="access_key=$(terraform_backend_access_key)"
+              workingDirectory: '$(Agent.BuildDirectory)\terraform'
+
+          - task: PowerShell@2
+            displayName: 'Terraform plan'
+            inputs:
+              targetType: 'inline'
+              script: |
+                terraform plan `
+                -out=plan `
+                -var-file="envProd.tfvars" `
+                -var client_id=$(client_id) `
+                -var client_secret=$(client_secret) `
+                -var tenant_id=$(tenant_id) `
+                -var subscription_id=$(subscription_id) `
+                -var NsgSourceAddressPrefix=$(NsgSourceAddressPrefix) `
+                -var Username=$(Username) `
+                -var Password=$(Password)
+              workingDirectory: '$(Agent.BuildDirectory)\terraform'
+
+          - task: PowerShell@2
+            displayName: 'Terraform apply'
+            inputs:
+              targetType: 'inline'
+              script: terraform apply -auto-approve plan
+              workingDirectory: '$(Agent.BuildDirectory)\terraform'
