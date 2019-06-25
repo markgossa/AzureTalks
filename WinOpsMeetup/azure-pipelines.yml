@@ -135,4 +135,4 @@ stages:
                 -var NsgSourceAddressPrefix=$(NsgSourceAddressPrefix) `
                 -var Username=$(Username) `
                 -var Password=$(Password)
-              workingDirectory: '$(Build.SourcesDirectory)\WinOpsMeetup\27-06-2019 - Terraform and Windows\AzurePipelineDemo\terraform'
+              workingDirectory: 'terraform'
