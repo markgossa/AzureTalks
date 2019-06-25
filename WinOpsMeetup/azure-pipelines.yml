@@ -120,7 +120,7 @@ stages:
                 -backend-config="storage_account_name=$(terraform_backend_storage_account_name)" `
                 -backend-config="container_name=$(terraform_backend_container_name)" `
                 -backend-config="key=$(terraform_backend_key)" `
-                -backend-config="access_key=$(terraform_backend_access_key)
+                -backend-config="access_key=$(terraform_backend_access_key)"
               workingDirectory: '$(Agent.BuildDirectory)\terraform'
 
           - task: PowerShell@2
