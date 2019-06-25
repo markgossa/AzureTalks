@@ -53,7 +53,7 @@ resource "azurerm_public_ip" "publicIp1" {
   name                         = "${var.PublicIpAddressName}"
   location                     = "${azurerm_resource_group.resourceGroup1.location}"
   resource_group_name          = "${azurerm_resource_group.resourceGroup1.name}"
-  public_ip_address_allocation = "static"
+  allocation_method            = "Static"
 }
 
 # Create a virtual network interface
@@ -86,7 +86,7 @@ resource "azurerm_virtual_machine" "main" {
   }
 
   os_profile_windows_config {
-    provision_vm_agent = "True"
+    provision_vm_agent = true
   }
 
   storage_os_disk {
