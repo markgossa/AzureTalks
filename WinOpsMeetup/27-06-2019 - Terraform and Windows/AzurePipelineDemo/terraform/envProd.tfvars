@@ -1,0 +1,12 @@
+ResourceGroupName = "RG-WinOps-Prod"
+ResourceGroupLocation = "West Europe"
+VnetName = "VNET0001-Prod"
+VnetAddressSpace = ["10.0.0.0/16"]
+NsgName = "NSG-LAN-Prod"
+SubnetName = "LAN-Prod"
+SubnetAddressPrefix = "10.0.0.0/24"
+PublicIpAddressName = "vm0001-prod-pip"
+NetworkInterfaceName = "vm0001-prod-nic"
+VirtualMachineName = "vmprod0001"
+VirtualMachineSize = "Standard_A2_v2"
+VirtualMachineOsDiskName = "vm0001-prod-disk1"
